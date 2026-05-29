@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Train & Eat — My Week</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0a0a0a;--surface:#111113;--surface2:#1a1a1e;--surface3:#222228;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#ede9df;--muted:#6b6b65;--muted2:#4a4a45;
+  --accent:#d4f53c;--accent2:#f5a623;--red:#ff5252;--blue:#52b8ff;--teal:#3cffd4;--purple:#b452ff;--green:#52ff8a;
+}
+html,body{height:100%;overflow-x:hidden;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.header{padding:2rem 2rem 0;max-width:1100px;margin:0 auto;display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:2.8rem;letter-spacing:0.04em;line-height:1;}
+.logo em{color:var(--accent);font-style:normal;}
+.week-info{text-align:right;}
+.week-label{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;}
+.week-num{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--accent);}
+.week-controls{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:4px;}
+.wk-btn{padding:6px 14px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-family:'DM Mono',monospace;font-size:0.72rem;border-radius:4px;cursor:pointer;}
+.wk-btn:hover{color:var(--text);border-color:var(--accent);}
+.top-nav{max-width:1100px;margin:1.5rem auto 0;padding:0 2rem;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.day-nav{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1;}
+.day-nav::-webkit-scrollbar{display:none;}
+.day-btn{flex-shrink:0;padding:8px 14px;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-family:'DM Mono',monospace;font-size:0.72rem;cursor:pointer;letter-spacing:0.08em;text-transform:uppercase;transition:all 0.15s;position:relative;}
+.day-btn.active{background:var(--accent);color:#0a0a0a;border-color:var(--accent);font-weight:500;}
+.day-btn .dot{position:absolute;top:5px;right:5px;width:4px;height:4px;border-radius:50%;background:var(--accent2);}
+.mode-toggle{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:3px;flex-shrink:0;}
+.mode-btn{padding:7px 14px;border-radius:4px;border:none;background:transparent;color:var(--muted);font-family:'DM Mono',monospace;font-size:0.68rem;cursor:pointer;text-transform:uppercase;transition:all 0.15s;}
+.mode-btn.active{background:var(--surface3);color:var(--text);}
+.main{max-width:1100px;margin:0 auto;padding:1.5rem 2rem 4rem;}
+.week-progress{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;}
+.wp-label{font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;}
+.wp-dots{display:flex;gap:6px;}
+.wp-dot{width:28px;height:6px;border-radius:2px;background:var(--surface3);transition:all 0.2s;}
+.wp-dot.done{background:var(--accent);}
+.wp-dot.today{background:var(--accent2);}
+.wp-stat{font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--muted);}
+.wp-stat span{color:var(--text);}
+.phase-banner{border-radius:8px;padding:10px 16px;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.phase-banner.p1{background:rgba(99,153,34,0.1);border:1px solid rgba(99,153,34,0.3);}
+.phase-banner.p2{background:rgba(186,117,23,0.1);border:1px solid rgba(186,117,23,0.3);}
+.phase-banner.p3{background:rgba(82,184,255,0.08);border:1px solid rgba(82,184,255,0.2);}
+.phase-name{font-family:'DM Mono',monospace;font-size:0.72rem;font-weight:500;}
+.phase-name.p1{color:var(--accent);}
+.phase-name.p2{color:var(--accent2);}
+.phase-name.p3{color:var(--blue);}
+.phase-cal{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:0.04em;}
+.phase-cal.p1{color:var(--accent);}
+.phase-cal.p2{color:var(--accent2);}
+.phase-cal.p3{color:var(--blue);}
+.day-header{margin-bottom:1.5rem;}
+.day-title{font-family:'Bebas Neue',sans-serif;font-size:3.5rem;letter-spacing:0.04em;line-height:1;}
+.day-subtitle{font-size:0.82rem;color:var(--muted);margin-top:4px;font-style:italic;}
+.day-tags{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.tag{font-family:'DM Mono',monospace;font-size:0.65rem;padding:4px 10px;border-radius:2px;letter-spacing:0.08em;text-transform:uppercase;font-weight:500;}
+.tag-lift{background:rgba(212,245,60,0.12);color:var(--accent);border:1px solid rgba(212,245,60,0.25);}
+.tag-cardio{background:rgba(82,184,255,0.12);color:var(--blue);border:1px solid rgba(82,184,255,0.25);}
+.tag-stretch{background:rgba(60,255,212,0.1);color:var(--teal);border:1px solid rgba(60,255,212,0.2);}
+.tag-class{background:rgba(245,166,35,0.12);color:var(--accent2);border:1px solid rgba(245,166,35,0.25);}
+.tag-recovery{background:rgba(180,82,255,0.1);color:var(--purple);border:1px solid rgba(180,82,255,0.2);}
+.tag-double{background:rgba(255,82,82,0.1);color:var(--red);border:1px solid rgba(255,82,82,0.2);}
+.sessions{display:grid;gap:1rem;}
+.sessions.two-col{grid-template-columns:1fr 1fr;}
+.session-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.session-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.session-time{font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--muted);}
+.session-name{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:0.05em;}
+.session-type-bar{width:3px;height:28px;border-radius:2px;flex-shrink:0;}
+.session-header-left{display:flex;align-items:center;gap:12px;}
+.complete-btn{font-family:'DM Mono',monospace;font-size:0.62rem;padding:4px 10px;border-radius:2px;border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;text-transform:uppercase;transition:all 0.15s;}
+.complete-btn.done{background:rgba(212,245,60,0.12);color:var(--accent);border-color:rgba(212,245,60,0.3);}
+.ex-table{width:100%;border-collapse:collapse;}
+.ex-table th{font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;padding:8px 18px;text-align:left;border-bottom:1px solid var(--border);font-weight:400;}
+.ex-table td{padding:10px 18px;font-size:0.85rem;border-bottom:1px solid var(--border);vertical-align:middle;}
+.ex-table tr:last-child td{border-bottom:none;}
+.ex-table tr:hover td{background:var(--surface2);}
+.ex-name{font-weight:500;}
+.ex-detail{font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--muted);}
+.ex-target{font-family:'DM Mono',monospace;font-size:0.78rem;padding:3px 8px;border-radius:2px;background:var(--surface3);color:var(--accent);display:inline-block;}
+.ex-target.cardio{color:var(--blue);background:rgba(82,184,255,0.08);}
+.ex-target.stretch{color:var(--teal);background:rgba(60,255,212,0.08);}
+.progress-badge{font-family:'DM Mono',monospace;font-size:0.62rem;padding:2px 6px;border-radius:2px;background:rgba(245,166,35,0.12);color:var(--accent2);border:1px solid rgba(245,166,35,0.2);margin-left:4px;}
+.overload-info{background:rgba(245,166,35,0.06);border:1px solid rgba(245,166,35,0.15);border-radius:6px;padding:10px 14px;margin:10px 18px;font-size:0.78rem;color:var(--accent2);font-style:italic;}
+.notes-area{padding:14px 18px;border-top:1px solid var(--border);}
+.notes-label{font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--muted2);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;}
+.notes-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.82rem;padding:8px 10px;resize:none;outline:none;line-height:1.5;min-height:52px;}
+.notes-input::placeholder{color:var(--muted2);}
+.cal-target-display{display:flex;align-items:center;gap:12px;padding:12px 18px;background:var(--surface2);border-bottom:1px solid var(--border);}
+.cal-num{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;color:var(--accent);line-height:1;}
+.cal-label{font-size:0.78rem;color:var(--muted);line-height:1.4;}
+.cal-week{font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--accent2);}
+.workout-block{padding:0 18px 14px;}
+.interval-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.interval-row:last-child{border-bottom:none;}
+.int-num{font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--muted2);width:20px;}
+.int-name{font-size:0.85rem;font-weight:500;flex:1;}
+.int-detail{font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--muted);}
+.int-effort{font-family:'DM Mono',monospace;font-size:0.65rem;padding:3px 7px;border-radius:2px;}
+.effort-easy{background:rgba(60,255,212,0.08);color:var(--teal);}
+.effort-hard{background:rgba(212,245,60,0.1);color:var(--accent);}
+.effort-max{background:rgba(255,82,82,0.1);color:var(--red);}
+.view{display:none;}.view.active{display:block;}
+.macro-bar-wrap{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1.25rem 1.5rem;margin-bottom:1rem;}
+.macro-title{font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:1rem;}
+.macro-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.macro-item{text-align:center;}
+.macro-val{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:0.04em;line-height:1;}
+.macro-lbl{font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:2px;}
+.macro-bar{height:4px;border-radius:2px;margin-top:6px;background:var(--surface3);overflow:hidden;}
+.macro-fill{height:100%;border-radius:2px;transition:width 0.4s;}
+.macro-goal{font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted2);margin-top:3px;}
+.meal-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:1rem;}
+.meal-card-header{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface2);flex-wrap:wrap;gap:8px;}
+.meal-card-name{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:0.05em;}
+.meal-card-macros{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted);}
+.meal-item-row{display:flex;justify-content:space-between;align-items:flex-start;padding:11px 18px;border-bottom:1px solid var(--border);}
+.meal-item-row:last-child{border-bottom:none;}
+.mi-left{flex:1;}
+.mi-name{font-weight:500;font-size:0.88rem;}
+.mi-desc{font-size:0.76rem;color:var(--muted);font-style:italic;margin-top:2px;}
+.mi-macros{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted);margin-top:3px;}
+.tip-box{padding:10px 14px;background:rgba(99,153,34,0.08);border-top:1px solid var(--border);font-size:0.78rem;color:var(--muted);font-style:italic;}
+.water-track{display:flex;align-items:center;gap:10px;padding:14px 18px;flex-wrap:wrap;}
+.water-label{font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;}
+.water-glasses{display:flex;gap:5px;flex-wrap:wrap;}
+.glass-btn{width:22px;height:26px;border-radius:2px;border:1px solid var(--border2);background:transparent;cursor:pointer;transition:all 0.15s;}
+.glass-btn.filled{background:rgba(82,184,255,0.25);border-color:var(--blue);}
+.water-count{font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--blue);}
+.shop-category{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:1rem;}
+.shop-cat-header{padding:12px 18px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.shop-cat-name{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:0.05em;color:var(--accent);}
+.shop-item{display:flex;align-items:flex-start;gap:12px;padding:10px 18px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s;}
+.shop-item:last-child{border-bottom:none;}
+.shop-item:hover{background:var(--surface2);}
+.shop-check{width:18px;height:18px;border-radius:3px;border:1px solid var(--border2);background:transparent;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all 0.15s;}
+.shop-check.checked{background:var(--accent);border-color:var(--accent);color:#0a0a0a;font-weight:700;}
+.shop-item-name{font-size:0.88rem;font-weight:500;}
+.shop-item-qty{font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--accent2);}
+.shop-item-notes{font-size:0.75rem;color:var(--muted);font-style:italic;}
+.add-shop-row{padding:12px 18px;display:flex;gap:8px;align-items:center;border-top:1px solid var(--border);}
+.add-shop-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.82rem;padding:6px 10px;outline:none;margin:0;}
+.add-shop-btn{padding:6px 14px;border-radius:4px;border:1px solid rgba(212,245,60,0.3);background:rgba(212,245,60,0.08);color:var(--accent);font-family:'DM Mono',monospace;font-size:0.7rem;cursor:pointer;white-space:nowrap;text-transform:uppercase;}
+.shop-progress{font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--muted);margin-bottom:1rem;}
+.shop-progress span{color:var(--accent);}
+.shop-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px;}
+.shop-title{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:0.04em;}
+.btn-sm{font-family:'DM Mono',monospace;font-size:0.65rem;padding:5px 12px;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;text-transform:uppercase;}
+.btn-sm:hover{color:var(--text);border-color:var(--border2);}
+@media(max-width:700px){
+  .sessions.two-col{grid-template-columns:1fr;}
+  .macro-grid{grid-template-columns:1fr 1fr;}
+  .day-title{font-size:2.5rem;}
+  .main{padding:1rem 1rem 4rem;}
+  .header{padding:1.5rem 1rem 0;}
+  .top-nav{padding:0 1rem;}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">TRAIN<em>.</em>EAT</div>
+  <div class="week-info">
+    <div class="week-label">Current week</div>
+    <div class="week-num" id="week-display">WK 1</div>
+    <div class="week-controls">
+      <button class="wk-btn" onclick="changeWeek(-1)">← prev</button>
+      <button class="wk-btn" onclick="changeWeek(1)">next →</button>
+    </div>
+  </div>
+</header>
+
+<div class="top-nav">
+  <div class="day-nav" id="day-nav"></div>
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="mb-train" onclick="setMode('training')">🏋️ Train</button>
+    <button class="mode-btn" id="mb-food" onclick="setMode('food')">🥩 Eat</button>
+    <button class="mode-btn" id="mb-shop" onclick="setMode('shop')">🛒 Shop</button>
+  </div>
+</div>
+
+<main class="main">
+  <div id="phase-banner"></div>
+  <div class="week-progress" id="week-progress"></div>
+  <div class="view active" id="v-training"><div id="day-content"></div></div>
+  <div class="view" id="v-food"><div id="food-content"></div></div>
+  <div class="view" id="v-shop"><div id="shop-content"></div></div>
+</main>
+
+<script>
+const SK='traineat_v5';
+function loadState(){
+  const d={currentWeek:1,currentDay:0,completed:{},notes:{},water:{},shopChecked:{},customShop:[]};
+  return JSON.parse(localStorage.getItem(SK)||JSON.stringify(d));
+}
+function saveState(s){localStorage.setItem(SK,JSON.stringify(s));}
+let state=loadState();
+let currentMode='training';
+
+const DAYS=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const SHORT=['MON','TUE','WED','THU','FRI','SAT','SUN'];
+
+// ---- PHASE CONFIG ----
+function getPhase(w){
+  if(w<=3)return{num:1,name:'Phase 1 — Build (Wks 1–3)',cal:2600,p:200,c:270,f:72,cls:'p1'};
+  if(w<=6)return{num:2,name:'Phase 2 — Transition (Wks 4–6)',cal:2400,p:195,c:245,f:67,cls:'p2'};
+  return{num:3,name:'Phase 3 — Cut (Wks 7–12)',cal:2200,p:190,c:215,f:60,cls:'p3'};
+}
+
+// ---- MEAL DATA ----
+const PRE={nm:'Pre-Training',ic:'⚡',cal:115,p:2,c:27,f:0,locked:true,items:[
+  {n:'Banana',d:'Quick carb — easy on stomach',m:'1P · 27C · 0F · 105cal'},
+  {n:'Electrolytes',d:'Mixed in 500ml water',m:'0P · 0C · 0F · 5cal'},
+  {n:'Pre-workout',d:'Mixed in water',m:'1P · 2C · 0F · 10cal'},
+]};
+const DRINKS={nm:'Drinks',ic:'☕',cal:0,p:0,c:0,f:0,locked:true,items:[
+  {n:'Black coffee',d:'As many as you like — no milk',m:'0P · 0C · 0F · 0cal'},
+  {n:'Coke Zero',d:'Free — zero calories, drink freely',m:'0P · 0C · 0F · 0cal'},
+]};
+const DESSERT={nm:'Dessert',ic:'🍦',cal:60,p:1,c:14,f:1,locked:true,items:[
+  {n:'Cyclone / ice block × 1',d:'Every night — earned it',m:'1P · 14C · 1F · 60cal'},
+]};
+const SNACK={nm:'Afternoon Snack',ic:'🍓',cal:185,p:28,c:22,f:2,items:[
+  {n:'Greek yoghurt 150g',d:'High protein base',m:'9P · 6C · 4F · 88cal'},
+  {n:'Protein powder 1 scoop',d:'Mix through yoghurt',m:'25P · 3C · 2F · 120cal'},
+  {n:'Frozen berries 80g',d:'On top',m:'1P · 9C · 0F · 35cal'},
+]};
+const BSM_LIFT={nm:'Breakfast — Smoothie (post-weights)',ic:'🥤',cal:420,p:28,c:70,f:3,items:[
+  {n:'Protein powder 1 scoop',d:'Blend with everything',m:'25P · 3C · 2F · 120cal'},
+  {n:'Frozen berries 150g',d:'Straight from freezer',m:'1P · 15C · 0F · 65cal'},
+  {n:'Banana 1.5',d:'Extra carbs post-weights',m:'2P · 40C · 0F · 165cal'},
+  {n:'Coconut water 300ml',d:'Blend it all',m:'0P · 14C · 0F · 60cal'},
+]};
+const BSM_STD={nm:'Breakfast — Smoothie',ic:'🥤',cal:350,p:27,c:59,f:2,items:[
+  {n:'Protein powder 1 scoop',d:'Blend with everything',m:'25P · 3C · 2F · 120cal'},
+  {n:'Frozen berries 150g',d:'Straight from freezer',m:'1P · 15C · 0F · 65cal'},
+  {n:'Banana 1 medium',d:'Adds creaminess',m:'1P · 27C · 0F · 105cal'},
+  {n:'Coconut water 300ml',d:'Blend it all',m:'0P · 14C · 0F · 60cal'},
+]};
+const BSM_CARDIO={nm:'Breakfast — Light Smoothie (post-cardio)',ic:'🥤',cal:280,p:28,c:35,f:3,items:[
+  {n:'Protein powder 1 scoop',d:'Blend with everything',m:'25P · 3C · 2F · 120cal'},
+  {n:'Frozen berries 100g',d:'Smaller serve',m:'1P · 10C · 0F · 43cal'},
+  {n:'Banana ½',d:'Light carb',m:'0P · 14C · 0F · 52cal'},
+  {n:'Coconut water 200ml',d:'Smaller smoothie today',m:'0P · 9C · 0F · 40cal'},
+]};
+const BMF_LIFT={nm:'Breakfast — Egg & Bacon Muffins (post-weights)',ic:'🥚',cal:790,p:54,c:87,f:25,items:[
+  {n:'English muffins × 3',d:'Toasted — split and stack',m:'15P · 66C · 3F · 360cal'},
+  {n:'Eggs × 3',d:'One per muffin, any style',m:'18P · 1C · 15F · 210cal'},
+  {n:'Chicken bacon × 3 rashers',d:'Pan fry with cooking spray until crispy',m:'18P · 1C · 7F · 135cal'},
+  {n:'Low sugar tomato sauce 25g',d:'On each muffin',m:'0P · 5C · 0F · 20cal'},
+  {n:'Extra banana or slice of bread',d:'Post-weights extra carb boost',m:'1P · 14C · 0F · 55cal'},
+  {n:'Cooking spray',d:'For pan',m:'0P · 0C · 0F · 5cal'},
+]};
+const BMF_CLASS={nm:'Breakfast — Egg & Bacon Muffins',ic:'🥚',cal:735,p:51,c:74,f:25,items:[
+  {n:'English muffins × 3',d:'Toasted — split and stack',m:'15P · 66C · 3F · 360cal'},
+  {n:'Eggs × 3',d:'One per muffin, any style',m:'18P · 1C · 15F · 210cal'},
+  {n:'Chicken bacon × 3 rashers',d:'Pan fry with cooking spray until crispy',m:'18P · 1C · 7F · 135cal'},
+  {n:'Low sugar tomato sauce 25g',d:'On each muffin',m:'0P · 5C · 0F · 20cal'},
+  {n:'Cooking spray',d:'For pan',m:'0P · 0C · 0F · 5cal'},
+]};
+const LCK={nm:'Lunch — Asian Chicken Thighs',ic:'🍗',cal:675,p:62,c:68,f:17,items:[
+  {n:'Chicken thighs 250g baked',d:'Soy, garlic, sesame, ginger — 200°C 25min',m:'55P · 0C · 14F · 345cal'},
+  {n:'White rice 200g cooked',d:'~80g dry — batch cook early week',m:'6P · 57C · 1F · 260cal'},
+  {n:'Spring onion + sesame seeds',d:'Scatter over top',m:'0P · 2C · 1F · 15cal'},
+  {n:'Soy + chilli sauce 25ml',d:'Drizzle over',m:'1P · 6C · 0F · 28cal'},
+  {n:'Cooking spray',d:'For baking tray',m:'0P · 0C · 0F · 5cal'},
+]};
+const LMN={nm:'Lunch — Asian Beef Mince Bowl',ic:'🥩',cal:680,p:60,c:70,f:16,items:[
+  {n:'Beef mince 250g (5% fat)',d:'Brown in pan with cooking spray',m:'52P · 0C · 12F · 310cal'},
+  {n:'White rice 200g cooked',d:'~80g dry',m:'6P · 57C · 1F · 260cal'},
+  {n:'Spring onion + chilli',d:'Slice and scatter',m:'0P · 2C · 0F · 8cal'},
+  {n:'Soy + oyster sauce 25ml',d:'Mix through mince',m:'1P · 6C · 0F · 28cal'},
+  {n:'Sesame oil 5ml',d:'Drizzle at end',m:'0P · 0C · 2F · 42cal'},
+  {n:'Cooking spray',d:'For pan',m:'0P · 0C · 0F · 5cal'},
+]};
+const LWD={nm:'Lunch — Mince Bowl (legs extra carbs)',ic:'🥩',cal:730,p:62,c:78,f:16,items:[
+  {n:'Beef mince 250g (5% fat)',d:'Brown in pan with cooking spray',m:'52P · 0C · 12F · 310cal'},
+  {n:'White rice 230g cooked',d:'Extra serve — legs need it',m:'7P · 65C · 1F · 300cal'},
+  {n:'Spring onion + chilli',d:'Scatter over',m:'0P · 2C · 0F · 8cal'},
+  {n:'Soy + oyster sauce 25ml',d:'Mix through mince',m:'1P · 6C · 0F · 28cal'},
+  {n:'Sesame oil 5ml',d:'Drizzle at end',m:'0P · 0C · 2F · 42cal'},
+]};
+
+// Dinner carb rotates by day: Mon=rice, Tue=potato, Wed=kumara, Thu=potato, Fri=kumara, Sat=rice, Sun=kumara
+const DCARBS=[
+  {n:'White rice 180g cooked',d:'~70g dry weight',m:'5P · 50C · 0F · 225cal'},
+  {n:'White potato 220g roasted',d:'Wedges, cooking spray, 200°C 30min',m:'4P · 37C · 1F · 168cal'},
+  {n:'Kumara 220g roasted',d:'Cubes, cooking spray, 200°C 25min',m:'3P · 42C · 0F · 189cal'},
+  {n:'White potato 180g roasted',d:'Wedges, cooking spray',m:'4P · 31C · 1F · 140cal'},
+  {n:'Kumara 200g roasted',d:'Cubes, cooking spray',m:'3P · 38C · 0F · 172cal'},
+  {n:'White rice 180g cooked',d:'~70g dry weight',m:'5P · 50C · 0F · 225cal'},
+  {n:'Kumara 220g roasted',d:'Cubes, cooking spray, 200°C 25min',m:'3P · 42C · 0F · 189cal'},
+];
+
+function getDinner(di){
+  const carb=DCARBS[di];
+  const carbCal=parseInt((carb.m.match(/·\s*(\d+)cal/)||[0,225])[1]);
+  const carbC=parseInt((carb.m.match(/(\d+)C/)||[0,50])[1]);
+  const carbLabel=carb.n.split(' ').slice(0,2).join(' ');
+  return{
+    nm:`Dinner — Skirt Steak + ${carbLabel}`,ic:'🥩',
+    cal:519+carbCal,p:58,c:carbC+8,f:24,
+    items:[
+      {n:'Skirt steak 250g',d:'Hot pan + cooking spray, 2–3 min each side, rest 5 min',m:'50P · 0C · 18F · 370cal'},
+      carb,
+      {n:'Steamed greens 150g',d:'Broccoli, beans or broccolini',m:'4P · 8C · 0F · 48cal'},
+      {n:'Butter 5g on steak',d:'While steak rests — flavour',m:'0P · 0C · 4F · 36cal'},
+      {n:'Cooking spray',d:'For steak pan — saves ~100 kcal vs oil',m:'0P · 0C · 0F · 5cal'},
+    ]
+  };
+}
+
+const MEAL_NOTES=[
+  'Post-weights smoothie has extra carbs. Double session — afternoon snack between sessions.',
+  'Muffins post-class. Double day — afternoon snack before PM bike and stretch.',
+  'Biggest carb day — legs need fuel. Extra rice at lunch. Double day — snack between sessions.',
+  'Cardio only — lighter breakfast. REST evening. Lower carbs fine today.',
+  'Post-class muffins. Double day — snack between sessions. Big dinner end of week.',
+  'Post-WOD muffins. Extra carbs today — biggest session of the week!',
+  "Recovery day — standard smoothie. Mikko's Triangle AM. Hydrate all day for sauna.",
+];
+
+function getMeals(di){
+  const isDouble=[true,true,true,false,true,true,false][di];
+  const bfs=[BSM_LIFT,BMF_CLASS,BSM_LIFT,BSM_CARDIO,BMF_CLASS,BMF_LIFT,BSM_STD];
+  const lunches=[LCK,LMN,LWD,LCK,LMN,LCK,LCK];
+  const ms=[PRE,bfs[di],lunches[di]];
+  if(isDouble) ms.push(SNACK);
+  ms.push(getDinner(di));
+  ms.push(DESSERT);
+  ms.push(DRINKS);
+  return ms;
+}
+
+// ---- SHOPPING LIST ----
+const SHOP=[
+  {cat:'🥩 Meat & Protein',items:[
+    {n:'Chicken thighs (boneless, skin off)',q:'~1.75kg',nt:'Lunch Mon,Thu,Fri,Sat,Sun — batch bake'},
+    {n:'Beef mince (5% fat)',q:'~750g',nt:'Lunch Tue,Wed'},
+    {n:'Skirt steak',q:'~1.75kg (7 × 250g)',nt:'Dinner every night'},
+    {n:'Chicken bacon',q:'1 pack (~300g)',nt:'Breakfast Tue,Fri,Sat'},
+    {n:'Eggs (1 dozen)',q:'12',nt:'3 per muffin breakfast'},
+    {n:'Whey protein powder',q:'Check stock',nt:'Smoothies + afternoon snack'},
+  ]},
+  {cat:'🌾 Carbs & Grains',items:[
+    {n:'White rice',q:'2kg bag',nt:'Lunch daily + dinner Mon,Sat'},
+    {n:'English muffins',q:'2 packs (12)',nt:'3 per breakfast Tue,Fri,Sat'},
+  ]},
+  {cat:'🥔 Veg & Fruit',items:[
+    {n:'Bananas',q:'14+ (2 per day)',nt:'Pre-training + smoothies'},
+    {n:'Kumara / sweet potato',q:'~1.5kg',nt:'Dinner Wed,Fri,Sun'},
+    {n:'White potato',q:'~800g',nt:'Dinner Tue,Thu'},
+    {n:'Broccoli / green beans',q:'~1kg',nt:'Steamed greens every dinner'},
+    {n:'Spring onion',q:'2 bunches',nt:'Asian bowl garnish'},
+    {n:'Fresh ginger + garlic',q:'1 knob + 1 bulb',nt:'Chicken marinade'},
+    {n:'Frozen berries',q:'1kg bag',nt:'Smoothies + afternoon snack'},
+  ]},
+  {cat:'🥛 Dairy & Fats',items:[
+    {n:'Coconut water',q:'~1.5L',nt:'Smoothie base daily'},
+    {n:'Greek yoghurt',q:'500g tub',nt:'Afternoon snack double days'},
+    {n:'Butter',q:'1 block',nt:'Small amount on steak nightly'},
+  ]},
+  {cat:'🫙 Sauces & Condiments',items:[
+    {n:'Low sugar tomato sauce',q:'1 bottle',nt:'Egg muffin breakfasts'},
+    {n:'Soy sauce',q:'1 bottle',nt:'Asian bowls every lunch'},
+    {n:'Oyster sauce',q:'1 bottle',nt:'Mince bowl lunches'},
+    {n:'Sesame oil',q:'Small bottle',nt:'Mince bowl drizzle'},
+    {n:'Chilli sauce / sriracha',q:'1 bottle',nt:'Asian bowls'},
+    {n:'Sesame seeds',q:'Small pack',nt:'Garnish'},
+    {n:'Cooking spray',q:'2 cans',nt:'Replace oil for all cooking'},
+  ]},
+  {cat:'🍦 Treats & Drinks',items:[
+    {n:'Cyclone ice blocks',q:'1 box (7+)',nt:'One every night after dinner'},
+    {n:'Coke Zero',q:'Pack of cans or 2L bottles',nt:'Drink freely — zero cals'},
+    {n:'Coffee beans / instant',q:'Check stock',nt:'Black coffee anytime'},
+  ]},
+  {cat:'💊 Supplements',items:[
+    {n:'Electrolyte sachets',q:'7+',nt:'Every morning pre-training'},
+    {n:'Pre-workout',q:'Check stock',nt:'Every training morning'},
+  ]},
+];
+
+// ---- TRAINING DATA ----
+function getWeekData(week){
+  const mc=13+week,sq=Math.round((60+(week-1)*2.5)*10)/10,tr=Math.round((80+(week-1)*2.5)*10)/10,
+        lu=16+(week-1),rd=Math.round((50+(week-1)*2.5)*10)/10,hi=Math.round((60+(week-1)*2.5)*10)/10;
+  return[
+    {name:'Monday',sub:'Double — Lift AM + 20km Bike PM',tags:['lift','cardio','double'],ss:[
+      {tm:'5:30 AM',nm:'Lifting Program',tp:'lift',kd:'prog'},
+      {tm:'5:30 PM',nm:'20km Bike',tp:'cardio',kd:'bike'}]},
+    {name:'Tuesday',sub:'Double — Upper Body Class + Bike + Stretch',tags:['class','cardio','stretch','double'],ss:[
+      {tm:'6:00 AM',nm:'Upper Body Class',tp:'class',kd:'cls'},
+      {tm:'5:30 PM',nm:'Bike + Stretch',tp:'cardio',kd:'bstr'}]},
+    {name:'Wednesday',sub:'Double — Legs AM + 45min Stretch PM',tags:['legs','stretch','double'],ss:[
+      {tm:'5:30 AM',nm:'Legs',tp:'lift',kd:'legs',w:{sq,tr,lu,rd,hi}},
+      {tm:'5:30 PM',nm:'45 Min Stretch',tp:'stretch',kd:'s45'}]},
+    {name:'Thursday',sub:'AM Cardio — Concept2 Bike Sprints',tags:['cardio'],ss:[
+      {tm:'5:30 AM',nm:'Concept2 Bike — Sprints',tp:'cardio',kd:'c2b'}]},
+    {name:'Friday',sub:'Double — Upper Body Class + Stretch PM',tags:['class','stretch','double'],ss:[
+      {tm:'5:30 AM',nm:'Upper Body Class',tp:'class',kd:'cls'},
+      {tm:'5:00 PM',nm:'Stretch',tp:'stretch',kd:'spm'}]},
+    {name:'Saturday',sub:'WOD — make it up on the morning',tags:['class'],ss:[
+      {tm:'5:30 AM',nm:'WOD',tp:'class',kd:'wod'}]},
+    {name:'Sunday',sub:"Mikko's Triangle + Stretch + Sauna",tags:['cardio','recovery'],ss:[
+      {tm:'7:00 AM',nm:"Mikko's Triangle",tp:'cardio',kd:'mk',mc},
+      {tm:'4:00 PM',nm:'30min Stretch + Sauna',tp:'stretch',kd:'ssa'}]},
+  ];
+}
+
+function tc(t){return t==='lift'?'var(--accent)':t==='cardio'?'var(--blue)':t==='class'?'var(--accent2)':'var(--teal)';}
+function ii(ph,w){return`<input style="background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:0.78rem;width:${w||'100%'};outline:none;padding:2px 0;margin:0" placeholder="${ph}"/>`;}
+
+function rSess(s,di,si){
+  const k=`${state.currentWeek}-${di}-${si}`,nt=loadState().notes[k]||'',isDn=loadState().completed[k];
+  let inner='';
+  if(s.kd==='prog'){
+    inner=`<table class="ex-table"><tr><th>Exercise</th><th>Sets×Reps</th><th>Weight</th><th>Notes</th></tr>${[1,2,3,4,5,6,7,8].map(n=>`<tr><td>${ii('Exercise '+n)}</td><td>${ii('—','75px')}</td><td>${ii('kg','55px')}</td><td>${ii('...','100%')}</td></tr>`).join('')}</table>`;
+  }else if(s.kd==='bike'){
+    inner=`<table class="ex-table"><tr><th>Activity</th><th>Target</th></tr><tr><td class="ex-name">20km Ride</td><td><span class="ex-target cardio">Zone 2</span></td></tr></table>`;
+  }else if(s.kd==='cls'){
+    inner=`<div style="padding:10px 18px;font-size:0.82rem;color:var(--muted);font-style:italic">Coach-led session. Use notes below to log weights and how you felt.</div>`;
+  }else if(s.kd==='bstr'){
+    inner=`<table class="ex-table"><tr><th>Activity</th><th>Duration</th></tr><tr><td class="ex-name">Bike</td><td><span class="ex-target cardio">30 min easy</span></td></tr><tr><td class="ex-name">Stretch class</td><td><span class="ex-target stretch">Class</span></td></tr></table>`;
+  }else if(s.kd==='legs'){
+    const w=s.w;
+    inner=`${state.currentWeek>1?`<div class="overload-info">📈 <strong>Week ${state.currentWeek} progressive overload</strong> — weights increased. Keep pushing.</div>`:''}
+    <table class="ex-table"><tr><th>Exercise</th><th>Sets×Reps</th><th>Target</th><th>Actual</th></tr>
+    <tr><td class="ex-name">Squat</td><td class="ex-detail">5×5</td><td><span class="ex-target">${w.sq}kg<span class="progress-badge">+2.5/wk</span></span></td><td>${ii('kg','60px')}</td></tr>
+    <tr><td class="ex-name">Trap Bar DL</td><td class="ex-detail">5×8</td><td><span class="ex-target">${w.tr}kg<span class="progress-badge">+2.5/wk</span></span></td><td>${ii('kg','60px')}</td></tr>
+    <tr><td class="ex-name">DB Lunge</td><td class="ex-detail">4×10 each</td><td><span class="ex-target">${w.lu}kg<span class="progress-badge">+1/wk</span></span></td><td>${ii('kg','60px')}</td></tr>
+    <tr><td class="ex-name">Romanian DL</td><td class="ex-detail">4×10</td><td><span class="ex-target">${w.rd}kg<span class="progress-badge">+2.5/wk</span></span></td><td>${ii('kg','60px')}</td></tr>
+    <tr><td class="ex-name">Hip Thrusts</td><td class="ex-detail">4×10</td><td><span class="ex-target">${w.hi}kg<span class="progress-badge">+2.5/wk</span></span></td><td>${ii('kg','60px')}</td></tr>
+    <tr><td class="ex-name">Weighted Sit-up</td><td class="ex-detail">4×15</td><td>—</td><td>${ii('kg','60px')}</td></tr>
+    <tr><td class="ex-name">Russian Twists</td><td class="ex-detail">4×20</td><td>—</td><td>${ii('kg','60px')}</td></tr></table>`;
+  }else if(s.kd==='s45'){
+    inner=`<table class="ex-table"><tr><th>Activity</th><th>Duration</th><th>Focus</th></tr><tr><td class="ex-name">Full body stretch</td><td><span class="ex-target stretch">45 min</span></td><td class="ex-detail">Hips, hamstrings, quads priority</td></tr></table>`;
+  }else if(s.kd==='c2b'){
+    inner=`<div class="workout-block">
+    <div class="interval-row"><span class="int-num">WU</span><span class="int-name">Warm-up</span><span class="int-detail">10 min easy spin</span><span class="int-effort effort-easy">EASY</span></div>
+    <div class="interval-row"><span class="int-num">1</span><span class="int-name">Sprints</span><span class="int-detail">10s all-out / 50s easy × 6 rounds</span><span class="int-effort effort-max">MAX</span></div>
+    <div class="interval-row"><span class="int-num">2</span><span class="int-name">Threshold</span><span class="int-detail">3 min hard / 2 min easy × 4 rounds</span><span class="int-effort effort-hard">HARD</span></div>
+    <div class="interval-row"><span class="int-num">3</span><span class="int-name">Pyramid</span><span class="int-detail">30s/45s/60s/45s/30s — 15s rest between</span><span class="int-effort effort-hard">HARD</span></div>
+    <div class="interval-row"><span class="int-num">CD</span><span class="int-name">Cool-down</span><span class="int-detail">5 min easy</span><span class="int-effort effort-easy">EASY</span></div>
+    <div style="padding:8px 18px;font-size:0.72rem;color:var(--muted);font-style:italic">Damper 5–7. Smooth stroke on recovery intervals.</div></div>`;
+  }else if(s.kd==='wod'){
+    inner=`<table class="ex-table"><tr><th colspan="2" style="color:var(--accent2)">WOD — write it in on the morning 💥</th></tr>${[1,2,3,4,5,6].map(n=>`<tr><td style="width:20px;color:var(--muted2);font-size:0.75rem">${n}.</td><td>${ii('Movement / reps...')}</td></tr>`).join('')}</table>`;
+  }else if(s.kd==='mk'){
+    inner=`<div class="cal-target-display"><div class="cal-num">${s.mc}</div><div><div class="cal-label">cals per machine this week</div><div class="cal-week">Week ${state.currentWeek} — started at 14, +1 each week</div></div></div>
+    <table class="ex-table"><tr><th>Machine</th><th>Target</th><th>Actual</th><th>Time</th></tr>
+    ${[['Ski Erg','❄️'],['Row','🚣'],['Assault Bike','💨'],['Erg Bike (45s)','🚲']].map(([n,ic])=>`<tr><td class="ex-name">${ic} ${n}</td><td><span class="ex-target cardio">${s.mc} cal</span></td><td>${ii('cal','55px')}</td><td>${ii('sec','55px')}</td></tr>`).join('')}</table>`;
+  }else if(s.kd==='spm'){
+    inner=`<table class="ex-table"><tr><th>Activity</th><th>Duration</th></tr><tr><td class="ex-name">Stretch</td><td><span class="ex-target stretch">30 min</span></td></tr></table>`;
+  }else if(s.kd==='ssa'){
+    inner=`<table class="ex-table"><tr><th>Activity</th><th>Duration</th></tr><tr><td class="ex-name">Stretch</td><td><span class="ex-target stretch">30 min</span></td></tr><tr><td class="ex-name">🧖 Sauna</td><td><span class="ex-target stretch">Recovery</span></td></tr></table>`;
+  }
+  const dk=`done-${k}`,isDone=loadState().completed[dk];
+  return`<div class="session-card">
+    <div class="session-header">
+      <div class="session-header-left"><div class="session-type-bar" style="background:${tc(s.tp)}"></div><div><div class="session-time">${s.tm}</div><div class="session-name">${s.nm}</div></div></div>
+      <button class="complete-btn ${isDone?'done':''}" onclick="toggleDone('${dk}',this)">${isDone?'✓ Done':'Mark done'}</button>
+    </div>
+    ${inner}
+    <div class="notes-area"><div class="notes-label">Session notes</div>
+    <textarea class="notes-input" rows="2" placeholder="Notes, weights, how you felt..." onchange="saveNotes('${k}',this.value)">${nt}</textarea></div>
+  </div>`;
+}
+
+// ---- RENDER FUNCTIONS ----
+function renderTrain(di){
+  const wd=getWeekData(state.currentWeek),d=wd[di];
+  const tmap={'lift':'tag-lift','cardio':'tag-cardio','stretch':'tag-stretch','class':'tag-class','recovery':'tag-recovery','double':'tag-double','legs':'tag-lift','WOD':'tag-class'};
+  const tagHTML=d.tags.map(t=>`<span class="tag ${tmap[t]||'tag-cardio'}">${t}</span>`).join('');
+  const two=d.ss.length===2;
+  document.getElementById('day-content').innerHTML=`
+    <div class="day-header"><div class="day-title">${d.name}</div><div style="font-size:0.82rem;color:var(--muted);margin-top:4px;font-style:italic">${d.sub}</div><div class="day-tags">${tagHTML}</div></div>
+    <div class="sessions${two?' two-col':''}">${d.ss.map((s,si)=>rSess(s,di,si)).join('')}</div>`;
+}
+
+function renderFood(di){
+  const ph=getPhase(state.currentWeek);
+  const meals=getMeals(di);
+  let tCal=0,tP=0,tC=0,tF=0;
+  meals.forEach(m=>{tCal+=m.cal;tP+=m.p;tC+=m.c;tF+=m.f;});
+  const pct=(v,g)=>Math.min(100,Math.round(v/g*100));
+  const wk=`w-${state.currentWeek}-${di}`,wc=loadState().water[wk]||0;
+
+  const mH=meals.map(m=>`<div class="meal-card">
+    <div class="meal-card-header">
+      <div class="meal-card-name">${m.ic} ${m.nm}</div>
+      <div class="meal-card-macros">${m.cal} kcal · ${m.p}g P · ${m.c}g C · ${m.f}g F${m.locked?' · auto':''}</div>
+    </div>
+    ${m.items.map(it=>`<div class="meal-item-row"><div class="mi-left"><div class="mi-name">${it.n}</div><div class="mi-desc">${it.d}</div><div class="mi-macros">${it.m}</div></div></div>`).join('')}
+  </div>`).join('');
+
+  document.getElementById('food-content').innerHTML=`
+    <div class="macro-bar-wrap">
+      <div class="macro-title">${DAYS[di]} — ${ph.name}</div>
+      <div class="macro-grid">
+        <div class="macro-item"><div class="macro-val" style="color:var(--accent)">${tCal}</div><div class="macro-lbl">Calories</div><div class="macro-bar"><div class="macro-fill" style="width:${pct(tCal,ph.cal)}%;background:var(--accent)"></div></div><div class="macro-goal">${tCal}/${ph.cal}</div></div>
+        <div class="macro-item"><div class="macro-val" style="color:var(--green)">${tP}g</div><div class="macro-lbl">Protein</div><div class="macro-bar"><div class="macro-fill" style="width:${pct(tP,ph.p)}%;background:var(--green)"></div></div><div class="macro-goal">${tP}/${ph.p}g</div></div>
+        <div class="macro-item"><div class="macro-val" style="color:var(--blue)">${tC}g</div><div class="macro-lbl">Carbs</div><div class="macro-bar"><div class="macro-fill" style="width:${pct(tC,ph.c)}%;background:var(--blue)"></div></div><div class="macro-goal">${tC}/${ph.c}g</div></div>
+        <div class="macro-item"><div class="macro-val" style="color:var(--accent2)">${tF}g</div><div class="macro-lbl">Fat</div><div class="macro-bar"><div class="macro-fill" style="width:${pct(tF,ph.f)}%;background:var(--accent2)"></div></div><div class="macro-goal">${tF}/${ph.f}g</div></div>
+      </div>
+      <div class="tip-box">💡 ${MEAL_NOTES[di]}</div>
+    </div>
+    ${mH}
+    <div class="meal-card"><div class="water-track"><div class="water-label">💧 Water</div><div class="water-glasses">
+      ${Array.from({length:10},(_,i)=>`<button class="glass-btn ${i<wc?'filled':''}" onclick="toggleWater(${i},${di})" title="${(i+1)*250}ml"></button>`).join('')}
+    </div><div class="water-count">${wc}/10 · ${wc*250}ml</div></div></div>`;
+}
+
+function renderShop(){
+  const s=loadState();
+  const checked=s.shopChecked||{};
+  let gi=0;
+  const all=SHOP.reduce((a,c)=>a.concat(c.items),[]).concat(s.customShop||[]);
+  const done=all.filter((_,i)=>checked[i]).length;
+  const cH=SHOP.map(cat=>{
+    const iH=cat.items.map(item=>{
+      const idx=gi++,ck=checked[idx];
+      return`<div class="shop-item" onclick="toggleShop(${idx})">
+        <div class="shop-check ${ck?'checked':''}">${ck?'✓':''}</div>
+        <div style="${ck?'opacity:0.4;text-decoration:line-through':''}">
+          <div class="shop-item-name">${item.n}</div>
+          <div class="shop-item-qty">${item.q}</div>
+          <div class="shop-item-notes">${item.nt}</div>
+        </div></div>`;
+    }).join('');
+    return`<div class="shop-category"><div class="shop-cat-header"><span class="shop-cat-name">${cat.cat}</span><span style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--muted)">${cat.items.length} items</span></div>
+    ${iH}
+    <div class="add-shop-row"><input class="add-shop-input" placeholder="Add to ${cat.cat.split(' ').slice(1).join(' ')}..." id="si-${SHOP.indexOf(cat)}"/><button class="add-shop-btn" onclick="addShop(${SHOP.indexOf(cat)})">+ Add</button></div>
+    </div>`;
+  }).join('');
+  const custH=(s.customShop||[]).length?`<div class="shop-category"><div class="shop-cat-header"><span class="shop-cat-name">➕ My Additions</span></div>
+    ${(s.customShop||[]).map((item,i)=>{const idx=SHOP.reduce((a,c)=>a+c.items.length,0)+i,ck=checked[idx];return`<div class="shop-item" onclick="toggleShop(${idx})"><div class="shop-check ${ck?'checked':''}">${ck?'✓':''}</div><div style="${ck?'opacity:0.4;text-decoration:line-through':''}"><div class="shop-item-name">${item.n}</div></div></div>`;}).join('')}
+    </div>`:'';
+  document.getElementById('shop-content').innerHTML=`
+    <div class="shop-header"><div class="shop-title">🛒 Shopping List</div>
+    <div style="display:flex;gap:8px"><button class="btn-sm" onclick="clearShop()">Clear ticks</button><button class="btn-sm" onclick="tickAll()">Tick all</button></div></div>
+    <div class="shop-progress"><span>${done}</span> of ${all.length} items ticked</div>
+    ${cH}${custH}`;
+}
+
+function renderPhaseBanner(){
+  const ph=getPhase(state.currentWeek);
+  document.getElementById('phase-banner').innerHTML=`<div class="phase-banner ${ph.cls}">
+    <div><div class="phase-name ${ph.cls}">${ph.name}</div><div style="font-size:0.75rem;color:var(--muted);margin-top:2px">${ph.cls==='p1'?'Fuelling muscle growth — big calorie surplus':ph.cls==='p2'?'Stepping down — maintaining muscle, starting to cut':'Deficit phase — losing fat, protecting muscle'}</div></div>
+    <div class="phase-cal ${ph.cls}">${ph.cal} <span style="font-size:1rem;font-family:'DM Mono',monospace;font-weight:400">kcal</span></div>
+  </div>`;
+}
+
+function renderWeekProgress(){
+  const w=state.currentWeek,td=(new Date().getDay()+6)%7;
+  const dots=SHORT.map((d,i)=>{const dn=checkDayDone(i),isT=i===td&&w===state.currentWeek;return`<div class="wp-dot${dn?' done':isT?' today':''}" title="${d}"></div>`;}).join('');
+  const ph=getPhase(w);
+  document.getElementById('week-progress').innerHTML=`
+    <div><div class="wp-label">Week ${w}/12 progress</div><div class="wp-dots">${dots}</div></div>
+    <div class="wp-stat"><span>${SHORT.filter((_,i)=>checkDayDone(i)).length}</span>/7 done</div>
+    <div class="wp-stat">Mikko: <span>${13+w} cal</span>/machine</div>
+    <div class="wp-stat">Target: <span>${ph.cal} kcal · ${ph.p}g P</span></div>`;
+}
+
+function renderDayNav(){
+  document.getElementById('day-nav').innerHTML=DAYS.map((d,i)=>{
+    const isA=i===state.currentDay,isDn=checkDayDone(i),isTwo=getWeekData(state.currentWeek)[i].ss.length>1;
+    return`<button class="day-btn${isA?' active':''}" onclick="selectDay(${i})">${SHORT[i]}${isTwo&&!isA?'<span class="dot"></span>':''}${isDn&&!isA?' ✓':''}</button>`;
+  }).join('');
+}
+
+function checkDayDone(di){
+  const s=loadState(),wd=getWeekData(state.currentWeek)[di];
+  return wd.ss.every((_,si)=>s.completed[`done-${state.currentWeek}-${di}-${si}`]);
+}
+
+// ---- ACTIONS ----
+function toggleDone(key,btn){
+  const s=loadState();s.completed[key]=!s.completed[key];saveState(s);state=s;
+  btn.textContent=s.completed[key]?'✓ Done':'Mark done';
+  btn.classList.toggle('done',s.completed[key]);
+  renderDayNav();renderWeekProgress();
+}
+function saveNotes(k,v){const s=loadState();s.notes[k]=v;saveState(s);}
+function toggleWater(idx,di){
+  const s=loadState(),k=`w-${state.currentWeek}-${di}`,c=s.water[k]||0;
+  s.water[k]=idx<c?idx:idx+1;saveState(s);state=s;renderFood(di);
+}
+function toggleShop(idx){const s=loadState();if(!s.shopChecked)s.shopChecked={};s.shopChecked[idx]=!s.shopChecked[idx];saveState(s);state=s;renderShop();}
+function clearShop(){const s=loadState();s.shopChecked={};saveState(s);state=s;renderShop();}
+function tickAll(){
+  const s=loadState();if(!s.shopChecked)s.shopChecked={};
+  const total=SHOP.reduce((a,c)=>a+c.items.length,0)+(s.customShop||[]).length;
+  for(let i=0;i<total;i++)s.shopChecked[i]=true;
+  saveState(s);state=s;renderShop();
+}
+function addShop(ci){
+  const inp=document.getElementById(`si-${ci}`);const v=inp.value.trim();if(!v)return;
+  const s=loadState();if(!s.customShop)s.customShop=[];
+  s.customShop.push({n:v});saveState(s);state=s;inp.value='';renderShop();
+}
+function setMode(m){
+  currentMode=m;
+  ['training','food','shop'].forEach(x=>{
+    document.getElementById(`mb-${x==='training'?'train':x==='food'?'food':'shop'}`).classList.toggle('active',x===m);
+    document.getElementById('v-'+x).classList.toggle('active',x===m);
+  });
+  if(m==='training')renderTrain(state.currentDay);
+  else if(m==='food')renderFood(state.currentDay);
+  else renderShop();
+}
+function selectDay(i){
+  state.currentDay=i;saveState(state);renderDayNav();
+  if(currentMode==='training')renderTrain(i);else if(currentMode==='food')renderFood(i);
+}
+function changeWeek(dir){
+  state.currentWeek=Math.max(1,Math.min(12,state.currentWeek+dir));saveState(state);
+  document.getElementById('week-display').textContent=`WK ${state.currentWeek}`;
+  renderPhaseBanner();renderDayNav();renderWeekProgress();
+  if(currentMode==='training')renderTrain(state.currentDay);else if(currentMode==='food')renderFood(state.currentDay);
+}
+
+// ---- INIT ----
+document.getElementById('week-display').textContent=`WK ${state.currentWeek}`;
+renderPhaseBanner();renderDayNav();renderWeekProgress();renderTrain(state.currentDay);
+</script>
+</body>
+</html>
